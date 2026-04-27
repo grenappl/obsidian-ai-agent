@@ -11,7 +11,7 @@ wheels/
 
 .env
 test
-Prompt.md
+Input.md
 Response.md
 Logs
 Outputs
