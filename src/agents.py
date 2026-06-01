@@ -20,6 +20,12 @@ def get_sys_prompt(action: str):
         case "/summary":
             with open("./Prompts/Summarizer.md", "r") as note:
                 prompt = note.read()
+        case "/create":
+            with open("./Prompts/Creator.md", "r") as note:
+                prompt = note.read()
+        case "/test":
+            with open("./Prompts/Tester.md", "r") as note:
+                prompt = note.read()
         case _:
             raise Exception("Invalid cmd prompt!")
     return prompt

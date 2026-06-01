@@ -37,7 +37,7 @@ def run_agent(user_prompt: str, action: str) -> str:
     content = res["messages"][-1].content
     if isinstance(content, list):
         content = "".join(part["text"] for part in content if part.get("type") == "text")
-    print(content)
+    print("\n" + content + "\n")
     return content
 
 def main():
@@ -49,6 +49,7 @@ def main():
         print("- /inform")
         print("- /summarize")
         print("- /create")
+        print("- /test")
         print("- /exit")
         print()
         print("> ", end="")
