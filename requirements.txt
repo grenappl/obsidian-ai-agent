@@ -1,0 +1,11 @@
+# AI Agent Framework
+langchain
+langgraph
+langchain-google-genai
+langchain-openrouter
+# firecrawl
+
+# Misc
+python-dotenv
+pydantic
+pydantic-settings

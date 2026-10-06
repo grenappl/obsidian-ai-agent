@@ -8,10 +8,11 @@ wheels/
 
 # Virtual environments
 .venv
-
 .env
-test
-Input.md
-Response.md
-Logs
-Outputs
+
+# misc
+temp/
+Inputs/
+Outputs/
+PROMPT.md
+RESPONSE.md
