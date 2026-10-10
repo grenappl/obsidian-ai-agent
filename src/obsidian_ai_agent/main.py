@@ -1,17 +1,25 @@
 from dotenv import load_dotenv
-from langchain.messages import AIMessage, HumanMessage
 
-from .agent.workflow import Workflow
+from .agent import graph
+from .utils.path_utils import IO, create_io, read_file
 
 
 def main():
+    running = True
+
     load_dotenv()
+    create_io()
+    graph.build_graph()
 
-    workflow = Workflow()
-    workflow.create_io()
-    res: dict[str, AIMessage] = workflow.start({"messages": [HumanMessage("hi!")]})
+    while running:
+        cmd = input("> ").strip().lower()
 
-    print(res["messages"][1].content)
+        if cmd == "q":
+            running = False
+            break
+
+        prompt = read_file(IO["files"][0]).strip()
+        graph.run_graph(prompt)
 
 
 if __name__ == "__main__":

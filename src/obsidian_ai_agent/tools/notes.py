@@ -1,26 +1,26 @@
 from langchain.tools import tool
 
 
-@tool(description="")
+@tool
 def read_note():
-    pass
+    """reads note"""
 
 
-@tool(description="")
+@tool
 def create_note():
     pass
 
 
-@tool(description="")
+@tool
 def edit_note():
     pass
 
 
-@tool(description="")
+@tool
 def delete_note():
     pass
 
 
-@tool(description="")
+@tool
 def read_notes_list():
     pass
