@@ -8,6 +8,8 @@ authors = [
 ]
 requires-python = ">=3.13"
 dependencies = [
+    "asttokens>=3.0.2",
+    "comm>=0.2.3",
     "langchain>=1.4.3",
     "langchain-google-genai>=4.4.0",
     "langchain-openrouter>=0.2.9",

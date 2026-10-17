@@ -1,49 +1,56 @@
-import os
-
 from langchain.chat_models import init_chat_model
-from langchain.messages import HumanMessage, SystemMessage
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain.messages import AIMessage, HumanMessage, SystemMessage
 
-from . import prompts
-from .state import ClassifierResult
+from obsidian_ai_agent.config.settings import (
+    AGENT_ACTIONS,
+    MODEL,
+    PROVIDER,
+    get_API_KEY1,
+    get_API_KEY2,
+)
+
+from .prompts import CHATBOT_PROMPT, CLASSIFIER_PROMPT
+from .schemas import ClassifierResult
+
+
+def _get_models(temp: int = 0):
+    primary_model = init_chat_model(
+        model=MODEL,
+        model_provider=PROVIDER,
+        api_key=get_API_KEY1(),
+        temperature=temp,
+    )
+    backup_model = init_chat_model(
+        model=MODEL,
+        model_provider=PROVIDER,
+        api_key=get_API_KEY2(),
+        temperature=temp,
+    )
+    return primary_model, backup_model
 
 
 def run_classifier(user_prompt: str) -> ClassifierResult:
-    MODEL = "openrouter/free"
-    PROVIDER = "openrouter"
-    API_KEY = os.getenv("OPENROUTER_API_KEY")
+    print("Classifying prompt...")
+    primary_classifier, backup_classifier = _get_models()
 
-    classifier = init_chat_model(
-        model=MODEL,
-        model_provider=PROVIDER,
-        api_key=API_KEY,
-    )
-    classifier = classifier.with_structured_output(ClassifierResult)
-    return classifier.invoke(
-        [SystemMessage(prompts.CLASSIFIER_PROMPT), HumanMessage(user_prompt)]
+    primary_classifier = primary_classifier.with_structured_output(ClassifierResult)
+    backup_classifier = backup_classifier.with_structured_output(ClassifierResult)
+
+    unified_classifier = primary_classifier.with_fallbacks([backup_classifier])
+    return unified_classifier.invoke(
+        [SystemMessage(CLASSIFIER_PROMPT), HumanMessage(user_prompt)]
     )
 
 
-def run_agent(user_prompt: str, action: str) -> ChatGoogleGenerativeAI:
-    MODEL = "gemini-2.5-flash"
-    PROVIDER = "google-genai"
-    API_KEY_1 = os.getenv("GEMINI_API_KEY_1")
-    # API_KEY_2 = os.getenv("GEMINI_API_KEY_2")
+def run_assistant(action: str, user_prompt: str) -> AIMessage:
+    primary_assistant, backup_assistant = _get_models(temp=0.1)
 
-    primary_model = init_chat_model(
-        model=MODEL, model_provider=PROVIDER, api_key=API_KEY_1
+    sys_prompt: str
+    if action == AGENT_ACTIONS[0]:
+        print("Running chatbot...")
+        sys_prompt = CHATBOT_PROMPT
+
+    unified_assistant = primary_assistant.with_fallbacks([backup_assistant])
+    return unified_assistant.invoke(
+        [SystemMessage(sys_prompt), HumanMessage(user_prompt)]
     )
-    backup_model = init_chat_model(
-        model=MODEL, model_provider=PROVIDER, api_key=API_KEY_1
-    )
-
-    def get_prompt(action):
-        match action:
-            case "chat":
-                return prompts.CHATBOT_PROMPT
-            case "make":
-                return prompts.GENERATOR_PROMPT
-            # rest of prompts...
-
-    main_model = primary_model.with_fallbacks([backup_model])
-    return main_model.invoke([SystemMessage(get_prompt()), HumanMessage(user_prompt)])
